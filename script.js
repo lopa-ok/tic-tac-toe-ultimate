@@ -51,6 +51,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (winner) {
             const subBoardElement = document.getElementById(`sub-board-${mainIndex}`);
             subBoardElement.classList.add('disabled');
+
+            const winnerMark = document.createElement('div');
+            winnerMark.className = 'winner-mark';
+            winnerMark.innerText = winner;
+            subBoardElement.appendChild(winnerMark);
+
             game.mainBoardWinners[mainIndex] = winner;
         }
 
