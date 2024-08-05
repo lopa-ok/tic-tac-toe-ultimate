@@ -11,8 +11,15 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="main-board" class="board"></div>
-    <div id="player-turn" class="font-1"></div>
+    <div id="main-menu" class="menu">
+        <h1>Ultimate Tic Tac Toe</h1>
+        <button id="singleplayer-btn">Singleplayer</button>
+        <button id="multiplayer-btn">Multiplayer</button>
+    </div>
+    <div id="game-container" style="display: none;">
+        <div id="player-turn"></div>
+        <div id="main-board" class="main-board"></div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>

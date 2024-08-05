@@ -70,3 +70,22 @@ body {
     font-family: 'Slackey', sans-serif;
     color: #333;
 }
+.menu h1 {
+    font-family: 'Slackey', cursive;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.menu button {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    margin: 10px 0;
+    font-size: 1.2rem;
+    background-color: #fb8b3c;
+    border: none;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}

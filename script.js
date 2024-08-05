@@ -1,12 +1,35 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const mainMenu = document.getElementById('main-menu');
+    const singleplayerBtn = document.getElementById('singleplayer-btn');
+    const multiplayerBtn = document.getElementById('multiplayer-btn');
+    const gameContainer = document.getElementById('game-container');
     const mainBoard = document.getElementById('main-board');
     const playerTurn = document.getElementById('player-turn');
+
+    let gameMode = 'singleplayer'; // Default to singleplayer
 
     const game = {
         currentPlayer: 'X',
         mainBoard: Array(9).fill(null).map(() => Array(9).fill(null)),
         mainBoardWinners: Array(9).fill(null),
         nextPlayableBoard: null
+    };
+
+    singleplayerBtn.addEventListener('click', () => {
+        gameMode = 'singleplayer';
+        startGame();
+    });
+
+    multiplayerBtn.addEventListener('click', () => {
+        gameMode = 'multiplayer';
+        startGame();
+    });
+
+    const startGame = () => {
+        mainMenu.style.display = 'none';
+        gameContainer.style.display = 'block';
+        playerTurn.innerText = `Player ${game.currentPlayer}'s turn`;
+        createBoard();
     };
 
     const switchPlayer = () => {
@@ -33,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const winner = checkWinner(board);
         if (winner === 'X') return -10 + depth;
         if (winner === 'O') return 10 - depth;
-        if (board.every(cell => cell !== null)) return 0; 
+        if (board.every(cell => cell !== null)) return 0; // Tie
 
         const scores = [];
         const availableMoves = board.map((cell, index) => cell === null ? index : null).filter(cell => cell !== null);
@@ -102,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const handleClick = (e) => {
-        if (game.currentPlayer === 'O') return;
+        if (gameMode === 'singleplayer' && game.currentPlayer === 'O') return;
 
         const cell = e.target;
         const mainIndex = parseInt(cell.getAttribute('data-main-index'));
@@ -134,12 +157,18 @@ document.addEventListener('DOMContentLoaded', () => {
         game.nextPlayableBoard = winner ? null : subIndex;
         switchPlayer();
 
-        if (game.currentPlayer === 'O') {
-            setTimeout(makeAIMove, 500); 
+        if (gameMode === 'singleplayer' && game.currentPlayer === 'O') {
+            setTimeout(makeAIMove, 500); // Small delay for AI move
         }
     };
 
     const createBoard = () => {
+        mainBoard.innerHTML = '';
+        game.mainBoard = Array(9).fill(null).map(() => Array(9).fill(null));
+        game.mainBoardWinners = Array(9).fill(null);
+        game.currentPlayer = 'X';
+        game.nextPlayableBoard = null;
+
         for (let i = 0; i < 9; i++) {
             const subBoard = document.createElement('div');
             subBoard.id = `sub-board-${i}`;
