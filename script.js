@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentPlayer: 'X',
         mainBoard: Array(9).fill(null).map(() => Array(9).fill(null)),
         mainBoardWinners: Array(9).fill(null),
-        nextPlayableBoard: null
+        nextPlayableBoard: null,
     };
 
     singleplayerBtn.addEventListener('click', () => {
@@ -62,11 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        if (board.every(cell => cell !== null)) {
-            return 'draw';
-        }
-
-        return null;
+        return board.every(cell => cell !== null) ? 'draw' : null;
     };
 
     const getRandomMove = (board) => {
@@ -104,19 +100,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (winner === 'O') return 10 - depth;
         if (winner === 'draw') return 0;
 
-        const scores = [];
         const availableMoves = board.map((cell, index) => cell === null ? index : null).filter(cell => cell !== null);
-
-        availableMoves.forEach(move => {
+        const scores = availableMoves.map(move => {
             board[move] = isMaximizing ? 'O' : 'X';
             const score = minimax(board, depth + 1, !isMaximizing);
-            scores.push(score);
             board[move] = null;
+            return score;
         });
 
-        return isMaximizing
-            ? Math.max(...scores)
-            : Math.min(...scores);
+        return isMaximizing ? Math.max(...scores) : Math.min(...scores);
     };
 
     const findBestMove = (board) => {
@@ -223,18 +215,81 @@ document.addEventListener('DOMContentLoaded', () => {
         if (game.mainBoardWinners[subIndex] !== null) {
             game.nextPlayableBoard = null;
         }
+
+        if (checkMainBoardWinner()) {
+            setTimeout(() => displayWinnerScreen(game.currentPlayer), 100);
+            return;
+        }
+
         highlightPlayableBoard();
         switchPlayer();
 
         if (gameMode === 'singleplayer' && game.currentPlayer === 'O') {
-            setTimeout(makeAIMove, 500); 
+            setTimeout(makeAIMove, 500);
         }
+    };
+
+    const displayWinnerScreen = (winner) => {
+        const existingScreen = document.getElementById('winner-screen');
+        if (existingScreen) {
+            existingScreen.remove();
+        }
+
+        const winnerScreen = document.createElement('div');
+        winnerScreen.id = 'winner-screen';
+        
+        const winnerText = winner === 'draw' ? 'It\'s a Draw!' : `Player ${winner} Wins!`;
+        
+        winnerScreen.innerHTML = `
+            <h1>${winnerText}</h1>
+            <p>Congratulations! You have completed the game.</p>
+            <button id="play-again-btn">Play Again</button>
+        `;
+
+        gameContainer.appendChild(winnerScreen);
+
+        document.getElementById('play-again-btn').addEventListener('click', () => {
+            location.reload();
+        });
+    };
+
+    const checkMainBoardWinner = () => {
+        const winner = checkWinner(game.mainBoardWinners);
+
+        if (winner === 'X' || winner === 'O' || winner === 'draw') {
+            displayWinnerScreen(winner);
+            return true;
+        }
+
+        return false;
+    };
+
+    const createBoard = () => {
+        mainBoard.innerHTML = '';
+        game.mainBoard.forEach((board, mainIndex) => {
+            const subBoard = document.createElement('div');
+            subBoard.className = 'sub-board';
+            subBoard.id = `sub-board-${mainIndex}`;
+
+            board.forEach((_, subIndex) => {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.setAttribute('data-main-index', mainIndex);
+                cell.setAttribute('data-sub-index', subIndex);
+                cell.addEventListener('click', handleClick);
+                subBoard.appendChild(cell);
+            });
+
+            mainBoard.appendChild(subBoard);
+        });
+
+        highlightPlayableBoard();
     };
 
     const highlightPlayableBoard = () => {
         const subBoards = document.querySelectorAll('.sub-board');
         subBoards.forEach(subBoard => subBoard.classList.remove('highlight'));
-
+    
         if (game.nextPlayableBoard !== null && game.mainBoardWinners[game.nextPlayableBoard] === null) {
             const playableSubBoard = document.getElementById(`sub-board-${game.nextPlayableBoard}`);
             playableSubBoard.classList.add('highlight');
@@ -246,32 +301,4 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     };
-
-    const createBoard = () => {
-        mainBoard.innerHTML = '';
-        game.mainBoard = Array(9).fill(null).map(() => Array(9).fill(null));
-        game.mainBoardWinners = Array(9).fill(null);
-        game.nextPlayableBoard = null;
-
-        for (let i = 0; i < 9; i++) {
-            const subBoard = document.createElement('div');
-            subBoard.className = 'sub-board';
-            subBoard.id = `sub-board-${i}`;
-
-            for (let j = 0; j < 9; j++) {
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                cell.addEventListener('click', handleClick);
-                cell.setAttribute('data-main-index', i);
-                cell.setAttribute('data-sub-index', j);
-                subBoard.appendChild(cell);
-            }
-
-            mainBoard.appendChild(subBoard);
-        }
-    };
-
-    mainMenu.style.display = 'block';
-    difficultySelection.style.display = 'none';
-    gameContainer.style.display = 'none';
 });

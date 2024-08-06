@@ -109,3 +109,48 @@ body {
     justify-content: center;
     align-items: center;
 }
+#winner-screen {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 2;
+    width: 80%;
+    max-width: 400px;
+    display: none;
+}
+
+#winner-screen h1 {
+    font-family: 'Slackey', cursive;
+    color: #fb8b3c;
+    margin: 0;
+    font-size: 2rem;
+}
+
+#winner-screen p {
+    font-family: 'Gaegu', sans-serif;
+    color: #333;
+    margin: 10px 0;
+    font-size: 1.2rem;
+}
+
+#winner-screen button {
+    padding: 10px 20px;
+    font-family: 'Gaegu', sans-serif;
+    font-size: 1rem;
+    background-color: #fb8b3c;
+    border: none;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#winner-screen button:hover {
+    background-color: #e67e22;
+}
