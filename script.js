@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const switchPlayer = () => {
         game.currentPlayer = game.currentPlayer === 'X' ? 'O' : 'X';
         playerTurn.innerText = `Player ${game.currentPlayer}'s turn`;
+        highlightPlayableBoard();
     };
 
     const checkWinner = (board) => {
@@ -60,6 +61,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 return board[a];
             }
         }
+        
+        if (board.every(cell => cell !== null)) {
+            return 'draw';
+        }
+
         return null;
     };
 
@@ -69,10 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const getMediumMove = (board) => {
-        
         const availableMoves = board.map((cell, index) => cell === null ? index : null).filter(cell => cell !== null);
-        
-        
+
         for (const move of availableMoves) {
             board[move] = 'O';
             if (checkWinner(board) === 'O') {
@@ -82,7 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
             board[move] = null;
         }
 
-        
         for (const move of availableMoves) {
             board[move] = 'X';
             if (checkWinner(board) === 'X') {
@@ -92,7 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
             board[move] = null;
         }
 
-        
         return getRandomMove(board);
     };
 
@@ -100,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const winner = checkWinner(board);
         if (winner === 'X') return -10 + depth;
         if (winner === 'O') return 10 - depth;
-        if (board.every(cell => cell !== null)) return 0; 
+        if (winner === 'draw') return 0;
 
         const scores = [];
         const availableMoves = board.map((cell, index) => cell === null ? index : null).filter(cell => cell !== null);
@@ -172,15 +174,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 const subBoardElement = document.getElementById(`sub-board-${targetBoardIndex}`);
                 subBoardElement.classList.add('disabled');
 
+                const markClass = winner === 'draw' ? 'draw-mark' : 'winner-mark';
                 const winnerMark = document.createElement('div');
-                winnerMark.className = 'winner-mark';
-                winnerMark.innerText = winner;
+                winnerMark.className = markClass;
+                winnerMark.innerText = winner === 'draw' ? 'D' : winner;
                 subBoardElement.appendChild(winnerMark);
 
                 game.mainBoardWinners[targetBoardIndex] = winner;
             }
 
             game.nextPlayableBoard = bestMove === -1 || game.mainBoardWinners[bestMove] !== null ? null : bestMove;
+            highlightPlayableBoard();
             switchPlayer();
         }
     };
@@ -206,9 +210,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const subBoardElement = document.getElementById(`sub-board-${mainIndex}`);
             subBoardElement.classList.add('disabled');
 
+            const markClass = winner === 'draw' ? 'draw-mark' : 'winner-mark';
             const winnerMark = document.createElement('div');
-            winnerMark.className = 'winner-mark';
-            winnerMark.innerText = winner;
+            winnerMark.className = markClass;
+            winnerMark.innerText = winner === 'draw' ? 'D' : winner;
             subBoardElement.appendChild(winnerMark);
 
             game.mainBoardWinners[mainIndex] = winner;
@@ -218,10 +223,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (game.mainBoardWinners[subIndex] !== null) {
             game.nextPlayableBoard = null;
         }
+        highlightPlayableBoard();
         switchPlayer();
 
         if (gameMode === 'singleplayer' && game.currentPlayer === 'O') {
-            setTimeout(makeAIMove, 500); // Small delay for AI move
+            setTimeout(makeAIMove, 500); 
+        }
+    };
+
+    const highlightPlayableBoard = () => {
+        const subBoards = document.querySelectorAll('.sub-board');
+        subBoards.forEach(subBoard => subBoard.classList.remove('highlight'));
+
+        if (game.nextPlayableBoard !== null && game.mainBoardWinners[game.nextPlayableBoard] === null) {
+            const playableSubBoard = document.getElementById(`sub-board-${game.nextPlayableBoard}`);
+            playableSubBoard.classList.add('highlight');
+        } else if (game.nextPlayableBoard === null) {
+            subBoards.forEach((subBoard, index) => {
+                if (game.mainBoardWinners[index] === null) {
+                    subBoard.classList.add('highlight');
+                }
+            });
         }
     };
 
@@ -229,18 +251,17 @@ document.addEventListener('DOMContentLoaded', () => {
         mainBoard.innerHTML = '';
         game.mainBoard = Array(9).fill(null).map(() => Array(9).fill(null));
         game.mainBoardWinners = Array(9).fill(null);
-        game.currentPlayer = 'X';
         game.nextPlayableBoard = null;
 
         for (let i = 0; i < 9; i++) {
             const subBoard = document.createElement('div');
-            subBoard.id = `sub-board-${i}`;
             subBoard.className = 'sub-board';
-            subBoard.addEventListener('click', handleClick);
+            subBoard.id = `sub-board-${i}`;
 
             for (let j = 0; j < 9; j++) {
                 const cell = document.createElement('div');
                 cell.className = 'cell';
+                cell.addEventListener('click', handleClick);
                 cell.setAttribute('data-main-index', i);
                 cell.setAttribute('data-sub-index', j);
                 subBoard.appendChild(cell);
