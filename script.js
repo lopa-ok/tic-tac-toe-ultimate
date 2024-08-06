@@ -230,11 +230,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const displayWinnerScreen = (winner) => {
+        console.log("Displaying winner screen for:", winner); 
         const existingScreen = document.getElementById('winner-screen');
         if (existingScreen) {
             existingScreen.remove();
         }
-
+    
         const winnerScreen = document.createElement('div');
         winnerScreen.id = 'winner-screen';
         
@@ -245,13 +246,18 @@ document.addEventListener('DOMContentLoaded', () => {
             <p>Congratulations! You have completed the game.</p>
             <button id="play-again-btn">Play Again</button>
         `;
-
+    
         gameContainer.appendChild(winnerScreen);
-
+    
+        
         document.getElementById('play-again-btn').addEventListener('click', () => {
             location.reload();
         });
+    
+        
+        winnerScreen.style.display = 'block';
     };
+    
 
     const checkMainBoardWinner = () => {
         const winner = checkWinner(game.mainBoardWinners);
